@@ -1,5 +1,6 @@
 
-from tensorflow.contrib.slim.python.slim.nets import resnet_v1
+# from tensorflow.contrib.slim.python.slim.nets import resnet_v1
+from models import resnet_v1
 import tensorflow.contrib.slim as slim
 import tensorflow as tf
 

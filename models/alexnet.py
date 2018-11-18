@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
-from Data_Augmentation_NEU import get_file
-from Data_Augmentation_NEU import get_nextBatch
+from datasets.Data_Augmentation_NEU import get_file
+from datasets.Data_Augmentation_NEU import get_nextBatch
 
 class AlexNet(object):
 

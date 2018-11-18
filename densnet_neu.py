@@ -1,8 +1,7 @@
 import numpy as np
-import os
 import tensorflow as tf
-from Data_Augmentation_NEU import get_file
-from Data_Augmentation_NEU import get_nextBatch
+from datasets.Data_Augmentation_NEU import get_file
+from datasets.Data_Augmentation_NEU import get_nextBatch
 
 # This implements DenseNet-40,L=40 k=12
 # i.e. 3 dense blocks of 12 layers each.

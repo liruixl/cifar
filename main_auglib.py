@@ -1,22 +1,19 @@
 from models.densenet_bc import DenseNet_BC
-# from Data_Augmentation_NEU import get_file
-# from Data_Augmentation_NEU import get_nextBatch
 
-from datasets.Data_Augmentation_Gaoxian import get_file
-from datasets.Data_Augmentation_Gaoxian import get_nextBatch
+from datasets import BatchFactory
 import tensorflow as tf
 import numpy as np
-import  os
+import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 if __name__ == '__main__':
-    IMG_HEIGHT = 144
-    IMG_WIDTH = 144
+    IMG_HEIGHT = 224
+    IMG_WIDTH = 224
     IMG_DEPTH = 1
 
-    num_class = 6
-    batch_size = 12
-    learning_rate = 0.001
+    num_class = 11
+    batch_size = 4
+    learning_rate = 0.01
 
     graph = tf.Graph()
     with graph.as_default():
@@ -41,13 +38,14 @@ if __name__ == '__main__':
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
     # ============================注意=====数据集，路径==============================
-    TRAIN_DATA_PATH = 'F:/data/img/BaoImage3/train/'
-    TEST_DATA_PATH = 'F:/data/img/BaoImage3/test/'
-    ckpt_dir = 'gx3_densenet'
+    dataset_name = 'augLib'
+    TRAIN_DATA_PATH = r'F:/data/augLib/train'
+    TEST_DATA_PATH = r'F:/data/augLib/train'
+    ckpt_dir = 'ckpt/lib_densenet'
     if not os.path.exists(ckpt_dir):
-        os.mkdir(ckpt_dir)
-    train_data, train_labels = get_file(TRAIN_DATA_PATH)
-    test_data, test_labels = get_file(TEST_DATA_PATH)
+        os.makedirs(ckpt_dir)
+    train_data, train_labels = BatchFactory.get_file(dataset_name,TRAIN_DATA_PATH,is_shuffle=True)
+    test_data, test_labels = BatchFactory.get_file(dataset_name,TEST_DATA_PATH,is_shuffle=True)
 
     batch_count = len(train_data) // batch_size
     print('batch_num:', batch_count)
@@ -66,10 +64,11 @@ if __name__ == '__main__':
             if epoch == 30:
                 learning_rate = learning_rate/10
             for step in range(batch_count):
-                train_data_, train_labels_ = get_nextBatch(train_data,
-                                                           train_labels,
-                                                           batch_size,
-                                                           step)
+                train_data_, train_labels_ = BatchFactory.get_next_batch(dataset_name,
+                                                                         train_data,
+                                                                         train_labels,
+                                                                         batch_size,
+                                                                         step)
                 train_data_ = np.reshape(train_data_, [-1, IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH])
 
                 _, train_loss, acc = sess.run([train_op, loss, accuracy],
@@ -82,10 +81,11 @@ if __name__ == '__main__':
             loss_acc = [0, 0]
             test_batch_count = (len(test_data) + batch_size - 1) // batch_size
             for step in range(test_batch_count):
-                test_data_, test_labels_ = get_nextBatch(test_data,
-                                                         test_labels,
-                                                         batch_size,
-                                                         step)
+                test_data_, test_labels_ = BatchFactory.get_next_batch(dataset_name,
+                                                                       test_data,
+                                                                       test_labels,
+                                                                       batch_size,
+                                                                       step)
                 current_size = len(test_data_)
                 test_data_ = np.reshape(test_data_, [-1, IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH])
                 tmp = sess.run([loss, accuracy], feed_dict={xs: test_data_,

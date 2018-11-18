@@ -94,58 +94,6 @@ def augmentation(trainList, testList, root_dir):
         img = cv2.resize(img,(144,144),interpolation=cv2.INTER_CUBIC)
         cv2.imwrite(fileName, img)
 
-'''
-def getDataset(data_dir):
-    fileList,labelList = [],[]
-    for file in os.listdir(data_dir):
-        if '.bmp' in file:
-            index = defect_class[file.split('_')[0]]
-            #转换成one_hot编码
-            label = [0 for i in range(len(defect_class))]
-            label[index] = 1
-            img = cv2.imread(data_dir+file, cv2.IMREAD_GRAYSCALE)
-            img_resize = np.array(cv2.resize(img, (144, 144), interpolation=cv2.INTER_CUBIC))
-
-            # data normalization
-            img_resize = img_resize / np.max(img_resize)
-            img_resize = img_resize - np.mean(img_resize)
-
-            fileList.append(img_resize)
-            labelList.append(label)
-    fileList = np.array(fileList)
-    labelList = np.array(labelList)
-
-    # print(fileList.shape)
-    # print(labelList.shape)
-
-    dataset = tf.data.Dataset.from_tensor_slices((fileList,labelList))
-
-    return dataset
-
-def get_batch(image, label, new_shape, batch_size, capacity):
-    image = tf.cast(image, tf.string)
-    label = tf.cast(label, tf.int32)
-
-    input_queue = tf.train.slice_input_producer([image, label])
-
-    label = input_queue[1]
-    image_content = tf.read_file(input_queue[0])
-    image = tf.image.decode_bmp(image_content, channels=1)
-
-    image = tf.image.resize_images(image, new_shape)
-    image = tf.image.per_image_standardization(image)
-
-    image_batch, label_batch = tf.train.batch([image, label],
-                                              batch_size=batch_size,
-                                              num_threads=2,
-                                              capacity=capacity
-                                              )
-    # label_batch = tf.reshape(label_batch,[batch_size,6])
-    image_batch = tf.cast(image_batch, tf.float32)
-
-    return image_batch, label_batch
-'''
-
 def get_file(data_dir):
     fileList, labelList = [], []
     for file in os.listdir(data_dir):

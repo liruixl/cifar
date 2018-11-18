@@ -13,7 +13,7 @@ defect_class = {'Fo':0,'In':1,'Sc':2,'Cr':3,'Io':4,'Bs':5}
 #     os.makedirs(test_dir)
 
 # 数据增强方式：一张图四个角落和中心裁出五张，再水平翻转
-def getAllImg(origin_dir):
+def _getAllImg(origin_dir):
     trainList, testList = [], []
     defect_Fo, defect_In, defect_Sc, defect_Cr, defect_Io, defect_Bs = [],[],[],[],[],[]
     for file in os.listdir(origin_dir):
@@ -41,7 +41,7 @@ def getAllImg(origin_dir):
     return trainList,testList
 
 
-def augmentation(trainList, testList, origin_dir, train_dir, test_dir):
+def _augmentation(trainList, testList, origin_dir, train_dir, test_dir):
     if not os.path.exists(train_dir):
         os.makedirs(train_dir)
     if not os.path.exists(test_dir):
@@ -154,20 +154,20 @@ if __name__ == '__main__':
     train_dir = root_dir + 'train/'
     test_dir = root_dir + 'test/'
 
-    trainList, testList = getAllImg(origin_dir)
-    augmentation(trainList, testList, origin_dir, train_dir, test_dir)
+    trainList, testList = _getAllImg(origin_dir)
+    _augmentation(trainList, testList, origin_dir, train_dir, test_dir)
 
     root_dir = 'F:/data/img/BaoImage2/'
     origin_dir = root_dir + 'origin/'
     train_dir = root_dir + 'train/'
     test_dir = root_dir + 'test/'
-    augmentation(trainList, testList, origin_dir, train_dir, test_dir)
+    _augmentation(trainList, testList, origin_dir, train_dir, test_dir)
 
     root_dir = 'F:/data/img/BaoImage3/'
     origin_dir = root_dir + 'origin/'
     train_dir = root_dir + 'train/'
     test_dir = root_dir + 'test/'
-    augmentation(trainList, testList, origin_dir, train_dir, test_dir)
+    _augmentation(trainList, testList, origin_dir, train_dir, test_dir)
 
 
     print('Hello,tsy!')
