@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 import os
 import cv2
 
@@ -31,7 +32,9 @@ def _get_filelist(dir_path):
         file_list.append(os.path.join(dir_path,name))
     return file_list
 
+
 def get_file(data_dir):
+    # data_dir : train or test directory
     img_list = []
     label_list = []
     for class_dir in _get_filelist(data_dir):
@@ -60,9 +63,7 @@ def get_nextBatch(image, label, batch_size, step):
         # print(img)
         img = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
 
-        # img_resize = cv2.resize(img, (144, 144), interpolation=cv2.INTER_CUBIC)
-        img_resize = img
-
+        img_resize = cv2.resize(img, (224, 224), interpolation=cv2.INTER_CUBIC)
         # data normalization
         img_resize = img_resize / np.max(img_resize)
         img_resize = img_resize - np.mean(img_resize)
@@ -76,9 +77,70 @@ def get_nextBatch(image, label, batch_size, step):
     return np.array(data_batch), np.array(label_batch)
 
 
-if __name__ == '__main__':
-    imglist,labellist = get_file(train_dir)
-    a,b = get_nextBatch(imglist,labellist,5,20)
+def read_tfrecord(tf_filename,shape):
+    """
+    :param tf_filename: tfrecord name or tfrecords list or string Tensor,shape = [?]?
+    :param shape: decode img_data to the shape
+    :return: Tensor,img and label
+    """
+    if not isinstance(tf_filename,list) and not isinstance(tf_filename,tf.Tensor):
+        tf_filename = [tf_filename]
+    tf_filename_queue = tf.train.string_input_producer(tf_filename)
+    tf_reader = tf.TFRecordReader()
+    _, serialized_example = tf_reader.read(tf_filename_queue)
+    img_tensor,label_tensor = _parse_example(serialized_example,shape)
 
-    print(a.shape)
-    print(b.shape)
+    return img_tensor,label_tensor
+
+
+def _parse_example(serialized_example,shape):
+    features = tf.parse_single_example(serialized_example,
+                                       features={
+                                           'image/data': tf.FixedLenFeature([], tf.string),
+                                           'image/label': tf.FixedLenFeature([], tf.int64),
+                                       })
+    img = tf.decode_raw(features['image/data'], tf.uint8) # 解析时必须指定类型，不同类型所占字节数不一样
+    img = tf.reshape(img,shape=shape)  # uint8
+
+    # img = img/255.  # 不支持除法
+    img = tf.cast(img, tf.float32) * (1. / 255)
+    img = img - tf.reduce_mean(img)
+
+
+    label = features['image/label']
+    # label = tf.cast(label, tf.int32)
+
+    return img, label
+
+
+def _test_read_tfrecord():
+    import matplotlib.pyplot  as plt
+
+    # tf_name = tf.constant([r'F:\data\augLib\auglib_test.tfrecord', r'F:\data\augLib\auglib_test.tfrecord'],dtype = tf.string)
+    tf_name = [r'F:\data\augLib\auglib_test.tfrecord', r'F:\data\augLib\auglib_test.tfrecord']
+    img, label = read_tfrecord(tf_name, [224, 224])
+    with tf.Session() as sess:
+        coord = tf.train.Coordinator()
+        thread = tf.train.start_queue_runners(sess=sess, coord=coord)
+          # 不要忘记这句
+
+        # 队列线程thread 的开始，跟 feed_dict 有冲突？
+        # 开始时 queue 输入还是个placeholder
+        im  = sess.run(img)
+        print(type(im))
+        plt.imshow(im,cmap='gray') # raise TypeError("Invalid dimensions for image data") [224,224] or [224,224,3/4]
+        plt.show()
+
+        im2 = sess.run(img)
+        print(type(im2))
+        plt.imshow(im2)  # raise TypeError("Invalid dimensions for image data") [224,224] or [224,224,3/4]
+        plt.show()
+
+        coord.request_stop()
+        coord.join(thread)
+
+
+if __name__ == '__main__':
+    _test_read_tfrecord()
+
+

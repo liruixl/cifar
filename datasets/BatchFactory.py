@@ -16,7 +16,7 @@ def get_file(dataset_name,data_dir,is_shuffle = False):
         temp = list(zip(image, label))
         random.shuffle(temp)
         image, label = zip(*temp)
-    return image,label
+    return list(image),list(label)
 
 
 def get_next_batch(dataset_name,image,label,batch_size,step,):
