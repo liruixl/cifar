@@ -103,12 +103,11 @@ def _parse_example(serialized_example,shape):
     img = tf.reshape(img,shape=shape)  # uint8
 
     # img = img/255.  # 不支持除法
-    img = tf.cast(img, tf.float32) * (1. / 255)
+    img = tf.cast(img, tf.float32) * (1. / 255)-0.5
     img = img - tf.reduce_mean(img)
 
-
-    label = features['image/label']
-    # label = tf.cast(label, tf.int32)
+    label = features['image/label']  # dtype=int64   int64_list...
+    label = tf.cast(label, tf.int32)
 
     return img, label
 

@@ -13,8 +13,6 @@ DIRECTORY_TRAIN = 'train'
 DIRECTORY_TEST = 'test'
 
 
-
-
 def _process_one_image(dir_root,directory, name):
     """
     :param dir_root: the path of train or test dataset
@@ -27,7 +25,8 @@ def _process_one_image(dir_root,directory, name):
 
     if name.split('.')[-1] not in ['jpg','jpeg','png','bmp']:
         raise ValueError(name,'is not the image format')
-
+    if directory not in class_map:
+        raise ValueError('no class:', directory)
     label = class_map[directory]
     filename = dir_root+'/'+directory + '/' + name
     if not os.path.isfile(filename):
@@ -58,7 +57,6 @@ def _convert_to_example(img_data,label):
         'image/label': int64_feature(label)
     }))
     return example
-
 
 
 def run(dataset_dir, output_dir, name, shuffling=False):
