@@ -95,6 +95,12 @@ with tf.Session() as sess:
     print('初始化迭代器成功')
 
     img,label = sess.run([next_img,next_label])
+
+    """
+    bug bug bug
+    Process finished with exit code -1073741819 (0xC0000005)
+    """
+
     # print(img)
     # print(label)
 
